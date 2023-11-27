@@ -1,0 +1,60 @@
+{% extends 'base_restaurateur_page.html' %}
+
+{% block title %}Необработанные заказы | Star Burger{% endblock %}
+
+{% block content %}
+  <center>
+    <h2>Необработанные заказы</h2>
+  </center>
+
+  <hr/>
+  <br/>
+  <br/>
+  <div class="container">
+   <table class="table table-responsive">
+    <tr>
+      <th>ID заказа</th>
+      <th>Статус</th>
+      <th>Способ оплаты</th>
+      <th>Клиент</th>
+      <th>Телефон</th>
+      <th>Адрес доставки</th>
+      <th>Сумма заказа</th>
+      <th>Ресторан</th>
+      <th>Редактировать в админке</th>
+    </tr>
+
+    {% for item in order_items %}
+      <tr>
+        <td>{{ item.pk }}</td>
+        {% if item.status == "new" %}
+          <td><b style="color: red">{{ item.get_status_display }}</b></td>
+        {% else %}
+          <td><b style="color: green">{{ item.get_status_display }}</b></td>
+        {% endif %}
+        <td>{{ item.get_pay_display }}</td>
+        <td>{{ item.lastname }}</td>
+        <td>{{ item.phone_number }}</td>
+        <td>{{ item.address }}</td>
+        <td>{{ item.total_price }}</td>
+        <td>
+          {% if item.restaurant %}
+            <b style="color: green">Готовится в:</b>
+            <p>{{ item.restaurant }}</p>
+          {% else %}
+            <details>
+              <summary><b style="color: orange">Могут приготовить:</b></summary>
+                  {% for restaurant in item.restaurant_possible %}
+                    <p>- {{restaurant}} </p>
+                  {% endfor %}
+            </details>
+          {% endif %}
+        </td>
+        <td>
+          <a href='{% url "admin:foodcartapp_order_change" object_id=item.pk %}?next={{ request.get_full_path|urlencode }}'>Редактировать</a>
+        </td>
+      </tr>
+    {% endfor %}
+   </table>
+  </div>
+{% endblock %}
