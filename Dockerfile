@@ -10,16 +10,22 @@ RUN pip install --upgrade pip
 
 RUN apt update
 
-RUN useradd -rms /bin/bash admin && chmod 777 /opt /run
+# Create the admin user and add it to the existing group "burger_django"
+RUN groupadd -r burger_django && useradd -rms /bin/bash -g burger_django admin && chmod 777 /opt /run
 
 WORKDIR /starburger
 
-RUN mkdir /starburger/static && mkdir /starburger/media && chown -R starburger:starburger /starburger && chmod 755 /starburger
+RUN mkdir /starburger/static && mkdir /starburger/media && \
+    chown -R admin:burger_django /starburger && \
+    chmod 755 /starburger
 
-COPY --chown=starburger:starburger . .
+COPY --chown=admin:burger_django . .
 
 RUN pip install -r requirements.txt
 
 USER admin
 
-CMD ["qunicorn", "-b", "0.0.0.0:8001", "star_burger.wsgi:application"]
+CMD ./manage.py migrate
+CMD ./manage.py runserver 0.0.0.0:8000
+
+#CMD ["qunicorn", "-b", "0.0.0.0:8001", "star_burger.wsgi:application"]
